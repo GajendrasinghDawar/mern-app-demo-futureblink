@@ -36,9 +36,18 @@ PORT=5000
 MONGODB_URI=mongodb://127.0.0.1:27017/mern-flow
 OPENROUTER_API_KEY=your_openrouter_api_key
 OPENROUTER_MODEL=google/gemini-3.1-flash-lite-preview
+OPENROUTER_FALLBACK_MODELS=google/gemini-2.5-flash-lite,meta-llama/llama-3.2-3b-instruct:free
+OPENROUTER_MAX_TOKENS=256
+OPENROUTER_PROVIDER_SORT=price
 SITE_URL=http://localhost:5173
 SITE_NAME=MERN Flow Demo
 ```
+
+OpenRouter controls:
+
+- `OPENROUTER_FALLBACK_MODELS`: comma-separated model ids tried as automatic fallbacks.
+- `OPENROUTER_MAX_TOKENS`: caps response tokens to reduce credit usage.
+- `OPENROUTER_PROVIDER_SORT`: optional provider routing strategy: `price`, `latency`, or `throughput`.
 
 Optional frontend API base URL in `client/.env`:
 
@@ -100,6 +109,21 @@ From root:
 ```bash
 npm run typecheck
 ```
+
+## MongoDB Driver Quick Start
+
+This repo includes a quick-start script modeled on the official MongoDB Node.js driver guide.
+
+1. Set `MONGODB_URI` in `server/.env` to your Atlas connection string.
+2. Ensure Atlas sample data is loaded (includes `sample_mflix.movies`).
+3. Run:
+
+```bash
+cd server
+npm run quickstart
+```
+
+The script queries `sample_mflix.movies` for `Back to the Future` and prints the matching document.
 
 ## API Endpoints
 

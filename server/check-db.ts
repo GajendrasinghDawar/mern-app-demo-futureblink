@@ -1,4 +1,8 @@
-import { closeMongo, connectMongo, getFlowRunsCollection } from "./config/db.ts";
+import {
+  closeMongo,
+  connectMongo,
+  getFlowRunsCollection,
+} from "./config/db.ts";
 import { env } from "./config/env.ts";
 
 const checkDatabase = async (): Promise<void> => {

@@ -8,14 +8,15 @@
     "dev": "nodemon --watch . --ext ts --exec node server.ts",
     "start": "node server.ts",
     "typecheck": "tsc --noEmit",
-    "check-db": "node check-db.ts"
+    "check-db": "node check-db.ts",
+    "quickstart": "node quickstart.ts"
   },
   "dependencies": {
+    "@openrouter/sdk": "^0.10.2",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
-    "mongodb": "^7.1.1",
-    "openai": "^6.33.0"
+    "mongodb": "^7.1.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
