@@ -1,11 +1,20 @@
 .app-shell {
   min-height: 100vh;
   padding: 1.25rem;
-  color: #16181f;
+  color: var(--app-text);
   background:
-    radial-gradient(circle at 20% 0%, #f7b267 0, transparent 28%),
-    radial-gradient(circle at 100% 10%, #8dd3c7 0, transparent 24%),
-    linear-gradient(160deg, #fef6e4 0%, #f7f7ff 50%, #eef7f4 100%);
+    radial-gradient(circle at 20% 0%, var(--app-bg-top) 0, transparent 28%),
+    radial-gradient(
+      circle at 100% 10%,
+      var(--app-bg-bottom) 0,
+      transparent 24%
+    ),
+    linear-gradient(
+      160deg,
+      var(--amber-1) 0%,
+      var(--app-bg-mid) 50%,
+      var(--purple-1) 100%
+    );
 }
 
 .app-header {
@@ -13,16 +22,38 @@
   margin: 0 auto;
 }
 
+.title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
 .app-header h1 {
   margin: 0;
   font-size: clamp(1.8rem, 4vw, 2.8rem);
   letter-spacing: -0.02em;
+  font-family: "Geist Sans", "Segoe UI", sans-serif;
+  font-weight: 700;
+}
+
+.pixel-badge {
+  border-radius: 999px;
+  padding: 0.2rem 0.45rem;
+  font-family: "Geist Pixel", "Geist Sans", sans-serif;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--badge-text);
+  background: var(--badge-bg);
+  border: 1px solid var(--badge-border);
 }
 
 .app-header p {
   margin-top: 0.5rem;
   font-size: 1rem;
   opacity: 0.8;
+  color: var(--app-text-muted);
+  font-family: "Geist Sans", "Segoe UI", sans-serif;
 }
 
 .toolbar {
@@ -39,15 +70,25 @@
   border-radius: 0.7rem;
   padding: 0.7rem 1rem;
   font:
-    600 0.95rem "Space Grotesk",
+    600 0.95rem "Geist Sans",
+    "Segoe UI",
     sans-serif;
-  background: #ff7f11;
-  color: #fff;
+  background: var(--primary-solid);
+  color: var(--primary-text);
   cursor: pointer;
 }
 
+.toolbar button:hover {
+  background: var(--primary-solid-hover);
+}
+
 .toolbar button.ghost {
-  background: #0f766e;
+  background: var(--secondary-solid);
+  color: var(--secondary-text);
+}
+
+.toolbar button.ghost:hover {
+  background: var(--secondary-solid-hover);
 }
 
 .toolbar button:disabled {
@@ -56,9 +97,9 @@
 }
 
 .status {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: "Geist Mono", "Cascadia Mono", monospace;
   font-size: 0.84rem;
-  color: #334155;
+  color: var(--status-text);
 }
 
 .flow-wrap {
@@ -69,10 +110,10 @@
 .flow-canvas {
   height: 72vh;
   min-height: 460px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
+  border: 1px solid var(--panel-border);
   border-radius: 1rem;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.62);
+  background: var(--panel-bg);
   backdrop-filter: blur(4px);
 }
 
@@ -80,19 +121,24 @@
   min-width: 260px;
   max-width: 330px;
   border-radius: 0.85rem;
-  border: 1px solid #d4d8e5;
-  background: #fff;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+  border: 1px solid var(--node-border);
+  background: var(--node-bg);
+  box-shadow: 0 10px 30px var(--shadow-color);
 }
 
 .node-title {
   padding: 0.65rem 0.75rem;
-  border-bottom: 1px solid #eaedf5;
+  border-bottom: 1px solid var(--node-title-border);
   font-weight: 700;
   font-size: 0.85rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  background: linear-gradient(90deg, #fff4e6 0%, #edf9f7 100%);
+  font-family: "Geist Sans", "Segoe UI", sans-serif;
+  background: linear-gradient(
+    90deg,
+    var(--node-title-bg-left) 0%,
+    var(--node-title-bg-right) 100%
+  );
 }
 
 .node-textarea {
@@ -102,12 +148,13 @@
   resize: vertical;
   padding: 0.75rem;
   font:
-    500 0.95rem/1.45 "Space Grotesk",
+    500 0.95rem/1.45 "Geist Sans",
+    "Segoe UI",
     sans-serif;
 }
 
 .node-textarea:focus {
-  outline: 2px solid #ff7f11;
+  outline: 2px solid var(--focus-ring);
   outline-offset: -2px;
 }
 
@@ -117,6 +164,7 @@
   white-space: pre-wrap;
   font-size: 0.95rem;
   line-height: 1.45;
+  font-family: "Geist Sans", "Segoe UI", sans-serif;
 }
 
 @media (max-width: 768px) {

@@ -13,6 +13,13 @@ export type AskAiResponse = {
   answer: string;
 };
 
+export type AskAiErrorResponse = {
+  error: string;
+  code?: "RATE_LIMIT" | "CREDIT_LIMIT" | "UPSTREAM_UNAVAILABLE";
+  userMessage?: string;
+  retryAfterSeconds?: number;
+};
+
 export type SaveFlowResponse = {
   id: string;
   createdAt: string;

@@ -1,7 +1,73 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
+@import "@radix-ui/colors/amber.css";
+@import "@radix-ui/colors/jade.css";
+@import "@radix-ui/colors/purple.css";
+
+@font-face {
+  font-family: "Geist Sans";
+  src: url("./assets/fonts/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Sans";
+  src: url("./assets/fonts/Geist-Italic-wght.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("./assets/fonts/GeistMono-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("./assets/fonts/GeistMono-Italic-wght.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Pixel";
+  src: url("./assets/fonts/GeistPixel-Square.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Geist Sans", "Segoe UI", sans-serif;
+  --app-text: var(--purple-12);
+  --app-text-muted: var(--purple-11);
+  --app-bg-top: var(--amber-4);
+  --app-bg-mid: var(--purple-2);
+  --app-bg-bottom: var(--jade-3);
+  --primary-solid: var(--amber-9);
+  --primary-solid-hover: var(--amber-10);
+  --primary-text: var(--amber-1);
+  --secondary-solid: var(--jade-9);
+  --secondary-solid-hover: var(--jade-10);
+  --secondary-text: var(--jade-1);
+  --status-text: var(--purple-11);
+  --panel-bg: var(--amber-1);
+  --panel-border: var(--purple-6);
+  --node-bg: var(--purple-1);
+  --node-border: var(--purple-6);
+  --node-title-border: var(--purple-5);
+  --node-title-bg-left: var(--amber-3);
+  --node-title-bg-right: var(--jade-3);
+  --badge-text: var(--jade-12);
+  --badge-bg: var(--jade-4);
+  --badge-border: var(--jade-7);
+  --focus-ring: var(--amber-8);
+  --shadow-color: var(--purple-5);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

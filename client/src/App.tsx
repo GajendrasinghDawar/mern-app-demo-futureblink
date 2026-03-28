@@ -29,6 +29,9 @@ type ResultNodeData = {
 type AskAiResponse = {
   answer?: string;
   error?: string;
+  code?: "RATE_LIMIT" | "CREDIT_LIMIT" | "UPSTREAM_UNAVAILABLE";
+  userMessage?: string;
+  retryAfterSeconds?: number;
 };
 
 type SaveFlowResponse = {
@@ -148,6 +151,31 @@ function App() {
   const apiBaseUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
+  const getFriendlyAskAiError = (
+    data: AskAiResponse,
+    statusCode: number,
+  ): string => {
+    if (data.userMessage) {
+      return data.userMessage;
+    }
+
+    if (data.code === "RATE_LIMIT") {
+      return data.retryAfterSeconds
+        ? `Rate limit reached. Please wait ${data.retryAfterSeconds}s and try again.`
+        : "Rate limit reached. Please wait a moment and try again.";
+    }
+
+    if (data.code === "CREDIT_LIMIT") {
+      return "OpenRouter credits are low or exhausted. Please try again later.";
+    }
+
+    if (data.code === "UPSTREAM_UNAVAILABLE" || statusCode >= 500) {
+      return "AI service is temporarily unavailable. Please try again shortly.";
+    }
+
+    return data.error || "Failed to run flow.";
+  };
+
   const runFlow = async () => {
     if (!prompt.trim()) {
       setStatus("Please enter a prompt before running.");
@@ -167,7 +195,7 @@ function App() {
       const data = (await response.json()) as AskAiResponse;
 
       if (!response.ok || !data.answer) {
-        throw new Error(data.error || "Request failed.");
+        throw new Error(getFriendlyAskAiError(data, response.status));
       }
 
       setResult(data.answer);
@@ -222,7 +250,10 @@ function App() {
   return (
     <main className="app-shell">
       <header className="app-header">
-        <h1>AI Prompt Flow</h1>
+        <div className="title-row">
+          <h1>AI Prompt Flow</h1>
+          <span className="pixel-badge">flow</span>
+        </div>
         <p>
           Type in the input node, run the flow, and store the result in MongoDB.
         </p>
