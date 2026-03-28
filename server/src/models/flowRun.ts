@@ -1,4 +1,4 @@
-import mongoose, { InferSchemaType, type Model } from 'mongoose';
+import mongoose, { type InferSchemaType, type Model } from "mongoose";
 
 const flowRunSchema = new mongoose.Schema(
   {
@@ -19,4 +19,4 @@ const flowRunSchema = new mongoose.Schema(
 export type FlowRun = InferSchemaType<typeof flowRunSchema>;
 
 export const FlowRunModel: Model<FlowRun> =
-  mongoose.models.FlowRun || mongoose.model<FlowRun>('FlowRun', flowRunSchema);
+  mongoose.models.FlowRun || mongoose.model<FlowRun>("FlowRun", flowRunSchema);

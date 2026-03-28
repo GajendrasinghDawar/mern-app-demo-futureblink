@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Background,
   Controls,
@@ -13,9 +13,9 @@ import {
   type NodeTypes,
   type OnEdgesChange,
   type OnNodesChange,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import './App.css';
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import "./App.css";
 
 type InputNodeData = {
   prompt: string;
@@ -56,15 +56,17 @@ const ResultNode = ({ data }: NodeProps<Node<ResultNodeData>>) => {
     <div className="flow-node result-node">
       <Handle type="target" position={Position.Left} />
       <div className="node-title">AI Result</div>
-      <div className="node-result">{data.result || 'Click Run Flow to generate a response.'}</div>
+      <div className="node-result">
+        {data.result || "Click Run Flow to generate a response."}
+      </div>
     </div>
   );
 };
 
 function App() {
-  const [prompt, setPrompt] = useState('What is the capital of France?');
-  const [result, setResult] = useState('');
-  const [status, setStatus] = useState('Idle');
+  const [prompt, setPrompt] = useState("What is the capital of France?");
+  const [result, setResult] = useState("");
+  const [status, setStatus] = useState("Idle");
   const [isLoading, setIsLoading] = useState(false);
 
   const nodeTypes: NodeTypes = useMemo(
@@ -77,8 +79,8 @@ function App() {
 
   const [nodes, setNodes] = useState<Node[]>([
     {
-      id: 'prompt-node',
-      type: 'inputNode',
+      id: "prompt-node",
+      type: "inputNode",
       position: { x: 80, y: 120 },
       data: {
         prompt,
@@ -86,8 +88,8 @@ function App() {
       },
     },
     {
-      id: 'result-node',
-      type: 'resultNode',
+      id: "result-node",
+      type: "resultNode",
       position: { x: 520, y: 120 },
       data: {
         result,
@@ -97,9 +99,9 @@ function App() {
 
   const [edges, setEdges] = useState<Edge[]>([
     {
-      id: 'edge-prompt-result',
-      source: 'prompt-node',
-      target: 'result-node',
+      id: "edge-prompt-result",
+      source: "prompt-node",
+      target: "result-node",
       animated: true,
       style: { strokeWidth: 2 },
     },
@@ -108,7 +110,7 @@ function App() {
   const syncPromptNode = useCallback((value: string) => {
     setNodes((currentNodes) =>
       currentNodes.map((node) =>
-        node.id === 'prompt-node'
+        node.id === "prompt-node"
           ? {
               ...node,
               data: { ...node.data, prompt: value },
@@ -121,7 +123,7 @@ function App() {
   const syncResultNode = useCallback((value: string) => {
     setNodes((currentNodes) =>
       currentNodes.map((node) =>
-        node.id === 'result-node'
+        node.id === "result-node"
           ? {
               ...node,
               data: { ...node.data, result: value },
@@ -132,44 +134,48 @@ function App() {
   }, []);
 
   const onNodesChange: OnNodesChange = useCallback(
-    (changes) => setNodes((currentNodes) => applyNodeChanges(changes, currentNodes)),
+    (changes) =>
+      setNodes((currentNodes) => applyNodeChanges(changes, currentNodes)),
     [],
   );
 
   const onEdgesChange: OnEdgesChange = useCallback(
-    (changes) => setEdges((currentEdges) => applyEdgeChanges(changes, currentEdges)),
+    (changes) =>
+      setEdges((currentEdges) => applyEdgeChanges(changes, currentEdges)),
     [],
   );
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+  const apiBaseUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
   const runFlow = async () => {
     if (!prompt.trim()) {
-      setStatus('Please enter a prompt before running.');
+      setStatus("Please enter a prompt before running.");
       return;
     }
 
     setIsLoading(true);
-    setStatus('Running flow...');
+    setStatus("Running flow...");
 
     try {
       const response = await fetch(`${apiBaseUrl}/api/ask-ai`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
       });
 
       const data = (await response.json()) as AskAiResponse;
 
       if (!response.ok || !data.answer) {
-        throw new Error(data.error || 'Request failed.');
+        throw new Error(data.error || "Request failed.");
       }
 
       setResult(data.answer);
       syncResultNode(data.answer);
-      setStatus('Flow completed.');
+      setStatus("Flow completed.");
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to run flow.';
+      const message =
+        error instanceof Error ? error.message : "Failed to run flow.";
       setStatus(message);
     } finally {
       setIsLoading(false);
@@ -178,28 +184,29 @@ function App() {
 
   const saveFlow = async () => {
     if (!prompt.trim() || !result.trim()) {
-      setStatus('Run the flow first so prompt and response can be saved.');
+      setStatus("Run the flow first so prompt and response can be saved.");
       return;
     }
 
-    setStatus('Saving to MongoDB...');
+    setStatus("Saving to MongoDB...");
 
     try {
       const response = await fetch(`${apiBaseUrl}/api/flows/save`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt, response: result }),
       });
 
       const data = (await response.json()) as SaveFlowResponse;
 
       if (!response.ok || !data.id) {
-        throw new Error(data.error || 'Save failed.');
+        throw new Error(data.error || "Save failed.");
       }
 
       setStatus(`Saved successfully. Record ID: ${data.id}`);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to save flow.';
+      const message =
+        error instanceof Error ? error.message : "Failed to save flow.";
       setStatus(message);
     }
   };
@@ -216,12 +223,14 @@ function App() {
     <main className="app-shell">
       <header className="app-header">
         <h1>AI Prompt Flow</h1>
-        <p>Type in the input node, run the flow, and store the result in MongoDB.</p>
+        <p>
+          Type in the input node, run the flow, and store the result in MongoDB.
+        </p>
       </header>
 
       <section className="toolbar">
         <button type="button" onClick={runFlow} disabled={isLoading}>
-          {isLoading ? 'Running...' : 'Run Flow'}
+          {isLoading ? "Running..." : "Run Flow"}
         </button>
         <button type="button" className="ghost" onClick={saveFlow}>
           Save
