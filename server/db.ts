@@ -1,25 +1,18 @@
 import dotenv from "dotenv";
 import { MongoClient, type Collection, type Db } from "mongodb";
-import { toNumber } from "./utils.ts";
 import type { FlowRunDocument } from "./types.ts";
 
 dotenv.config();
 
-export const settings = {
-  port: toNumber(process.env.PORT, 5000),
-  mongoUri: process.env.MONGODB_URI,
-} as const;
+const MONGODB_URI = process.env.MONGODB_URI;
+const FLOW_RUNS_COLLECTION = "flow_runs";
 
 let mongoConnectionPromise: Promise<void> | null = null;
 let mongoClient: MongoClient | null = null;
 let database: Db | null = null;
 
-const FLOW_RUNS_COLLECTION = "flow_runs";
-
 export const connectMongo = async (): Promise<void> => {
-  const mongoUri = settings.mongoUri;
-
-  if (!mongoUri) {
+  if (!MONGODB_URI) {
     console.warn(
       "MONGODB_URI is not set. Save endpoint will fail until it is configured.",
     );
@@ -34,7 +27,7 @@ export const connectMongo = async (): Promise<void> => {
     return mongoConnectionPromise;
   }
 
-  mongoConnectionPromise = new MongoClient(mongoUri, {
+  mongoConnectionPromise = new MongoClient(MONGODB_URI, {
     serverSelectionTimeoutMS: 8000,
   })
     .connect()

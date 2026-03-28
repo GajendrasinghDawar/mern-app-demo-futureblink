@@ -1,7 +1,5 @@
 import type { ObjectId } from "mongodb";
 
-export type ProviderSort = "price" | "latency" | "throughput";
-
 export type AiErrorCode =
   | "RATE_LIMIT"
   | "CREDIT_LIMIT"

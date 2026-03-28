@@ -1,18 +1,17 @@
 import cors from "cors";
 import express, { type Request, type Response } from "express";
-import {
-  connectMongo,
-  getFlowRunsCollection,
-  isMongoConnected,
-  settings,
-} from "./db.ts";
-import { AiServiceError, generateAiResponse } from "./openrouter.ts";
+import { connectMongo, getFlowRunsCollection, isMongoConnected } from "./db.ts";
+import { generateAiResponse } from "./openrouter.ts";
 import type {
   AskAiApiResponse,
   AskAiRequestBody,
   SaveFlowRequestBody,
   SaveFlowResponse,
 } from "./types.ts";
+import { AiServiceError, toNumber } from "./utils.ts";
+
+const DEFAULT_PORT = 5000;
+const PORT = toNumber(process.env.PORT, DEFAULT_PORT);
 
 export const app = express();
 
@@ -100,8 +99,8 @@ app.post(
 export const startServer = async (): Promise<void> => {
   await connectMongo();
 
-  app.listen(settings.port, () => {
-    console.log(`Server running on http://localhost:${settings.port}`);
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
   });
 };
 

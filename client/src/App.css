@@ -93,6 +93,7 @@
   border: 1px solid var(--node-border);
   background: var(--node-bg);
   box-shadow: 0 2px 8px var(--shadow-color);
+  overflow: hidden;
 }
 
 .node-title {
@@ -112,6 +113,7 @@
 
 .node-textarea {
   width: 100%;
+  max-width: 100%;
   min-height: 140px;
   border: 0;
   resize: vertical;
@@ -131,6 +133,8 @@
   padding: 0.75rem;
   min-height: 140px;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   font-size: 0.95rem;
   line-height: 1.45;
   font-family: "Geist Sans", "Segoe UI", sans-serif;

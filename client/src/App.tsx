@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Background,
   Controls,
@@ -67,10 +67,15 @@ const ResultNode = ({ data }: NodeProps<Node<ResultNodeData>>) => {
 };
 
 function App() {
-  const [prompt, setPrompt] = useState("What is the capital of France?");
+  const [prompt, setPrompt] = useState("What is the capital of India?");
   const [result, setResult] = useState("");
   const [status, setStatus] = useState("Idle");
   const [isLoading, setIsLoading] = useState(false);
+  const STATUS_CLEAR_TIMEOUT_MS = 4500;
+  const runFlowAbortRef = useRef<AbortController | null>(null);
+  const saveFlowAbortRef = useRef<AbortController | null>(null);
+  const runFlowRequestIdRef = useRef(0);
+  const saveFlowRequestIdRef = useRef(0);
 
   const nodeTypes: NodeTypes = useMemo(
     () => ({
@@ -182,6 +187,11 @@ function App() {
       return;
     }
 
+    runFlowAbortRef.current?.abort();
+    const abortController = new AbortController();
+    runFlowAbortRef.current = abortController;
+    const requestId = ++runFlowRequestIdRef.current;
+
     setIsLoading(true);
     setStatus("Running flow...");
 
@@ -190,9 +200,14 @@ function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
+        signal: abortController.signal,
       });
 
       const data = (await response.json()) as AskAiResponse;
+
+      if (requestId !== runFlowRequestIdRef.current) {
+        return;
+      }
 
       if (!response.ok || !data.answer) {
         throw new Error(getFriendlyAskAiError(data, response.status));
@@ -202,11 +217,18 @@ function App() {
       syncResultNode(data.answer);
       setStatus("Flow completed.");
     } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+
       const message =
         error instanceof Error ? error.message : "Failed to run flow.";
       setStatus(message);
     } finally {
-      setIsLoading(false);
+      if (requestId === runFlowRequestIdRef.current) {
+        setIsLoading(false);
+        runFlowAbortRef.current = null;
+      }
     }
   };
 
@@ -216,6 +238,11 @@ function App() {
       return;
     }
 
+    saveFlowAbortRef.current?.abort();
+    const abortController = new AbortController();
+    saveFlowAbortRef.current = abortController;
+    const requestId = ++saveFlowRequestIdRef.current;
+
     setStatus("Saving to MongoDB...");
 
     try {
@@ -223,9 +250,14 @@ function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt, response: result }),
+        signal: abortController.signal,
       });
 
       const data = (await response.json()) as SaveFlowResponse;
+
+      if (requestId !== saveFlowRequestIdRef.current) {
+        return;
+      }
 
       if (!response.ok || !data.id) {
         throw new Error(data.error || "Save failed.");
@@ -233,9 +265,17 @@ function App() {
 
       setStatus(`Saved successfully. Record ID: ${data.id}`);
     } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+
       const message =
         error instanceof Error ? error.message : "Failed to save flow.";
       setStatus(message);
+    } finally {
+      if (requestId === saveFlowRequestIdRef.current) {
+        saveFlowAbortRef.current = null;
+      }
     }
   };
 
@@ -247,12 +287,40 @@ function App() {
     syncResultNode(result);
   }, [result, syncResultNode]);
 
+  useEffect(() => {
+    const shouldAutoClear =
+      Boolean(status) &&
+      status !== "Idle" &&
+      status !== "Running flow..." &&
+      status !== "Saving to MongoDB...";
+
+    if (!shouldAutoClear) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setStatus("");
+    }, STATUS_CLEAR_TIMEOUT_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [status]);
+
+  useEffect(() => {
+    return () => {
+      runFlowAbortRef.current?.abort();
+      saveFlowAbortRef.current?.abort();
+    };
+  }, []);
+
   return (
     <main className="app-shell">
       <header className="app-header">
-        <h1>AI Prompt Flow</h1>
+        <h1> AI humorous bot </h1>
         <p>
-          Type in the input node, run the flow, and store the result in MongoDB.
+          Its Futureblink demo app. Type in the input node, run the flow to get
+          a humorous AI response, and store the result in MongoDB.
         </p>
       </header>
 

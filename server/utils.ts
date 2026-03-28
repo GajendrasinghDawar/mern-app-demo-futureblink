@@ -1,4 +1,3 @@
-import type { ProviderSort } from "./types.ts";
 import type { AiErrorCode } from "./types.ts";
 
 export const toNumber = (
@@ -7,36 +6,6 @@ export const toNumber = (
 ): number => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
-};
-
-export const toProviderSort = (
-  value: string | undefined,
-): ProviderSort | undefined => {
-  if (!value) {
-    return undefined;
-  }
-
-  const normalized = value.trim().toLowerCase();
-  if (
-    normalized === "price" ||
-    normalized === "latency" ||
-    normalized === "throughput"
-  ) {
-    return normalized;
-  }
-
-  return undefined;
-};
-
-export const toModelList = (value: string | undefined): string[] => {
-  if (!value) {
-    return [];
-  }
-
-  return value
-    .split(",")
-    .map((model) => model.trim())
-    .filter(Boolean);
 };
 
 export const getErrorStatus = (error: unknown): number | undefined => {
