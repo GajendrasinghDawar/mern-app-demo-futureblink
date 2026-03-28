@@ -2,19 +2,12 @@
   min-height: 100vh;
   padding: 1.25rem;
   color: var(--app-text);
-  background:
-    radial-gradient(circle at 20% 0%, var(--app-bg-top) 0, transparent 28%),
-    radial-gradient(
-      circle at 100% 10%,
-      var(--app-bg-bottom) 0,
-      transparent 24%
-    ),
-    linear-gradient(
-      160deg,
-      var(--amber-1) 0%,
-      var(--app-bg-mid) 50%,
-      var(--purple-1) 100%
-    );
+  background: linear-gradient(
+    160deg,
+    var(--app-bg-top) 0%,
+    var(--app-bg-mid) 55%,
+    var(--app-bg-bottom) 100%
+  );
 }
 
 .app-header {
@@ -38,10 +31,10 @@
 
 .pixel-badge {
   border-radius: 999px;
-  padding: 0.2rem 0.45rem;
+  padding: 0.16rem 0.42rem;
   font-family: "Geist Pixel", "Geist Sans", sans-serif;
-  font-size: 0.66rem;
-  letter-spacing: 0.08em;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--badge-text);
   background: var(--badge-bg);
@@ -66,7 +59,7 @@
 }
 
 .toolbar button {
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 0.7rem;
   padding: 0.7rem 1rem;
   font:
@@ -114,7 +107,7 @@
   border-radius: 1rem;
   overflow: hidden;
   background: var(--panel-bg);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(2px);
 }
 
 .flow-node {
@@ -123,15 +116,15 @@
   border-radius: 0.85rem;
   border: 1px solid var(--node-border);
   background: var(--node-bg);
-  box-shadow: 0 10px 30px var(--shadow-color);
+  box-shadow: 0 4px 14px var(--shadow-color);
 }
 
 .node-title {
   padding: 0.65rem 0.75rem;
   border-bottom: 1px solid var(--node-title-border);
   font-weight: 700;
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   font-family: "Geist Sans", "Segoe UI", sans-serif;
   background: linear-gradient(
