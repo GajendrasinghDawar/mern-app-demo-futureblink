@@ -1,4 +1,4 @@
-import { connectMongo } from "../config.ts";
+import { connectMongo } from "../db.ts";
 import { app } from "../server.ts";
 
 await connectMongo();

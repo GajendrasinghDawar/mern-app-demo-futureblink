@@ -1,4 +1,5 @@
 import type { ProviderSort } from "./types.ts";
+import type { AiErrorCode } from "./types.ts";
 
 export const toNumber = (
   value: string | undefined,
@@ -91,3 +92,24 @@ export const getErrorMessage = (error: unknown): string => {
 
   return String(error);
 };
+
+export class AiServiceError extends Error {
+  public readonly status: number;
+  public readonly code: AiErrorCode;
+  public readonly userMessage: string;
+  public readonly retryAfterSeconds?: number;
+
+  constructor(args: {
+    message: string;
+    status: number;
+    code: AiErrorCode;
+    userMessage: string;
+    retryAfterSeconds?: number;
+  }) {
+    super(args.message);
+    this.status = args.status;
+    this.code = args.code;
+    this.userMessage = args.userMessage;
+    this.retryAfterSeconds = args.retryAfterSeconds;
+  }
+}

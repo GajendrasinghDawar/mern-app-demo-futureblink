@@ -1,79 +1,33 @@
 import dotenv from "dotenv";
 import { OpenRouter } from "@openrouter/sdk";
 import {
+  AiServiceError,
   getErrorMessage,
   getErrorStatus,
   getRetryAfterSeconds,
-  toModelList,
-  toNumber,
-  toProviderSort,
 } from "./utils.ts";
-import type { AiErrorCode } from "./types.ts";
 
 dotenv.config();
 
-const openrouterSettings = {
-  apiKey: process.env.OPENROUTER_API_KEY,
-  model: process.env.OPENROUTER_MODEL || "google/gemini-3.1-flash-lite-preview",
-  fallbackModels: toModelList(process.env.OPENROUTER_FALLBACK_MODELS),
-  maxTokens: toNumber(process.env.OPENROUTER_MAX_TOKENS, 256),
-  providerSort: toProviderSort(process.env.OPENROUTER_PROVIDER_SORT),
-  siteUrl: process.env.SITE_URL || "http://localhost:5173",
-  siteName: process.env.SITE_NAME || "MERN Flow Demo",
-} as const;
+const OPENROUTER_MODEL = "google/gemini-3.1-flash-lite-preview";
+const OPENROUTER_MAX_TOKENS = 256;
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
-const fallbackModels = [
-  openrouterSettings.model,
-  ...openrouterSettings.fallbackModels,
-  "google/gemini-2.5-flash-lite",
-  "meta-llama/llama-3.2-3b-instruct:free",
-].filter((value, index, array) => array.indexOf(value) === index);
-
-const getOpenRouterClient = (): OpenRouter => {
-  if (!openrouterSettings.apiKey) {
-    throw new Error("OPENROUTER_API_KEY is not configured.");
-  }
-
-  return new OpenRouter({
-    apiKey: openrouterSettings.apiKey,
-    httpReferer: openrouterSettings.siteUrl,
-    appTitle: openrouterSettings.siteName,
-  });
-};
-
-export class AiServiceError extends Error {
-  public readonly status: number;
-  public readonly code: AiErrorCode;
-  public readonly userMessage: string;
-  public readonly retryAfterSeconds?: number;
-
-  constructor(args: {
-    message: string;
-    status: number;
-    code: AiErrorCode;
-    userMessage: string;
-    retryAfterSeconds?: number;
-  }) {
-    super(args.message);
-    this.status = args.status;
-    this.code = args.code;
-    this.userMessage = args.userMessage;
-    this.retryAfterSeconds = args.retryAfterSeconds;
-  }
-}
-
-export const generateAiResponse = async (prompt: string): Promise<string> => {
-  const openRouter = getOpenRouterClient();
-
+export async function generateAiResponse(prompt: string): Promise<string> {
   try {
+    if (!OPENROUTER_API_KEY) {
+      throw new Error("OPENROUTER_API_KEY is not configured.");
+    }
+
+    const openRouter = new OpenRouter({
+      apiKey: OPENROUTER_API_KEY,
+    });
+
     const completion = await openRouter.chat.send({
       chatGenerationParams: {
-        models: fallbackModels,
+        model: OPENROUTER_MODEL,
         messages: [{ role: "user", content: prompt }],
-        maxTokens: Math.max(1, openrouterSettings.maxTokens),
-        provider: openrouterSettings.providerSort
-          ? { sort: openrouterSettings.providerSort }
-          : undefined,
+        maxTokens: Math.max(1, OPENROUTER_MAX_TOKENS),
         stream: false,
       },
     });
@@ -126,4 +80,4 @@ export const generateAiResponse = async (prompt: string): Promise<string> => {
 
     throw error;
   }
-};
+}

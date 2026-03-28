@@ -1,13 +1,12 @@
 import cors from "cors";
 import express, { type Request, type Response } from "express";
 import {
-  AiServiceError,
   connectMongo,
-  generateAiResponse,
   getFlowRunsCollection,
   isMongoConnected,
   settings,
-} from "./config.ts";
+} from "./db.ts";
+import { AiServiceError, generateAiResponse } from "./openrouter.ts";
 import type {
   AskAiApiResponse,
   AskAiRequestBody,
