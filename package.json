@@ -1,0 +1,20 @@
+{
+  "name": "mern-app-futureblink",
+  "version": "1.0.0",
+  "description": "MERN AI flow demo with React Flow, OpenRouter, and MongoDB",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "server/src/server.ts",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "build": "npm run build --prefix client",
+    "typecheck": "npm run typecheck --prefix server && npm run typecheck --prefix client",
+    "start": "npm run start --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
