@@ -1,82 +1,30 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Background,
   Controls,
-  Handle,
-  Position,
   ReactFlow,
   applyEdgeChanges,
   applyNodeChanges,
   type Edge,
   type Node,
-  type NodeProps,
   type NodeTypes,
   type OnEdgesChange,
   type OnNodesChange,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import "./App.css";
+import { InputNode, ResultNode } from "./FlowNodes";
+import { requestAiResponse, saveFlowRun } from "./flowApi";
+import { useQuery } from "./useQuery";
 
-type InputNodeData = {
-  prompt: string;
-  onChange: (value: string) => void;
-};
-
-type ResultNodeData = {
-  result: string;
-};
-
-type AskAiResponse = {
-  answer?: string;
-  error?: string;
-  code?: "RATE_LIMIT" | "CREDIT_LIMIT" | "UPSTREAM_UNAVAILABLE";
-  userMessage?: string;
-  retryAfterSeconds?: number;
-};
-
-type SaveFlowResponse = {
-  id?: string;
-  error?: string;
-};
-
-const InputNode = ({ data }: NodeProps<Node<InputNodeData>>) => {
-  return (
-    <div className="flow-node input-node">
-      <div className="node-title">Prompt Input</div>
-      <textarea
-        className="node-textarea"
-        value={data.prompt}
-        onChange={(event) => data.onChange(event.target.value)}
-        placeholder="Type your question..."
-      />
-      <Handle type="source" position={Position.Right} />
-    </div>
-  );
-};
-
-const ResultNode = ({ data }: NodeProps<Node<ResultNodeData>>) => {
-  return (
-    <div className="flow-node result-node">
-      <Handle type="target" position={Position.Left} />
-      <div className="node-title">AI Result</div>
-      <div className="node-result">
-        {data.result || "Click Run Flow to generate a response."}
-      </div>
-    </div>
-  );
-};
+const NOOP_PROMPT_CHANGE: (value: string) => void = () => {};
 
 function App() {
-  const [prompt, setPrompt] = useState("What is the capital of India?");
-  const [result, setResult] = useState("");
   const [status, setStatus] = useState("Idle");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [activePrompt, setActivePrompt] = useState("");
+  const [runKey, setRunKey] = useState(0);
   const STATUS_CLEAR_TIMEOUT_MS = 4500;
-  const runFlowAbortRef = useRef<AbortController | null>(null);
-  const saveFlowAbortRef = useRef<AbortController | null>(null);
-  const runFlowRequestIdRef = useRef(0);
-  const saveFlowRequestIdRef = useRef(0);
-
   const nodeTypes: NodeTypes = useMemo(
     () => ({
       inputNode: InputNode,
@@ -91,8 +39,8 @@ function App() {
       type: "inputNode",
       position: { x: 80, y: 120 },
       data: {
-        prompt,
-        onChange: setPrompt,
+        prompt: "What is the capital of India?",
+        onChange: NOOP_PROMPT_CHANGE,
       },
     },
     {
@@ -100,7 +48,7 @@ function App() {
       type: "resultNode",
       position: { x: 520, y: 120 },
       data: {
-        result,
+        result: "",
       },
     },
   ]);
@@ -115,7 +63,7 @@ function App() {
     },
   ]);
 
-  const syncPromptNode = useCallback((value: string) => {
+  const updatePromptNode = useCallback((value: string) => {
     setNodes((currentNodes) =>
       currentNodes.map((node) =>
         node.id === "prompt-node"
@@ -128,7 +76,7 @@ function App() {
     );
   }, []);
 
-  const syncResultNode = useCallback((value: string) => {
+  const updateResultNode = useCallback((value: string) => {
     setNodes((currentNodes) =>
       currentNodes.map((node) =>
         node.id === "result-node"
@@ -140,6 +88,20 @@ function App() {
       ),
     );
   }, []);
+
+  const prompt =
+    (
+      nodes.find((node) => node.id === "prompt-node")?.data as {
+        prompt?: string;
+      }
+    )?.prompt || "";
+
+  const result =
+    (
+      nodes.find((node) => node.id === "result-node")?.data as {
+        result?: string;
+      }
+    )?.result || "";
 
   const onNodesChange: OnNodesChange = useCallback(
     (changes) =>
@@ -156,80 +118,32 @@ function App() {
   const apiBaseUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
-  const getFriendlyAskAiError = (
-    data: AskAiResponse,
-    statusCode: number,
-  ): string => {
-    if (data.userMessage) {
-      return data.userMessage;
-    }
+  const fetchAiResponse = useCallback(
+    () => requestAiResponse(apiBaseUrl, activePrompt),
+    [activePrompt, apiBaseUrl],
+  );
 
-    if (data.code === "RATE_LIMIT") {
-      return data.retryAfterSeconds
-        ? `Rate limit reached. Please wait ${data.retryAfterSeconds}s and try again.`
-        : "Rate limit reached. Please wait a moment and try again.";
-    }
+  const {
+    data: aiAnswer,
+    isLoading,
+    isError,
+    errorMessage,
+  } = useQuery<string>({
+    queryKey: [activePrompt, runKey],
+    queryFn: fetchAiResponse,
+    initialData: "",
+    enabled: runKey > 0 && Boolean(activePrompt),
+  });
 
-    if (data.code === "CREDIT_LIMIT") {
-      return "OpenRouter credits are low or exhausted. Please try again later.";
-    }
-
-    if (data.code === "UPSTREAM_UNAVAILABLE" || statusCode >= 500) {
-      return "AI service is temporarily unavailable. Please try again shortly.";
-    }
-
-    return data.error || "Failed to run flow.";
-  };
-
-  const runFlow = async () => {
+  const runFlow = () => {
     if (!prompt.trim()) {
       setStatus("Please enter a prompt before running.");
       return;
     }
 
-    runFlowAbortRef.current?.abort();
-    const abortController = new AbortController();
-    runFlowAbortRef.current = abortController;
-    const requestId = ++runFlowRequestIdRef.current;
-
-    setIsLoading(true);
     setStatus("Running flow...");
-
-    try {
-      const response = await fetch(`${apiBaseUrl}/api/ask-ai`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-        signal: abortController.signal,
-      });
-
-      const data = (await response.json()) as AskAiResponse;
-
-      if (requestId !== runFlowRequestIdRef.current) {
-        return;
-      }
-
-      if (!response.ok || !data.answer) {
-        throw new Error(getFriendlyAskAiError(data, response.status));
-      }
-
-      setResult(data.answer);
-      syncResultNode(data.answer);
-      setStatus("Flow completed.");
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") {
-        return;
-      }
-
-      const message =
-        error instanceof Error ? error.message : "Failed to run flow.";
-      setStatus(message);
-    } finally {
-      if (requestId === runFlowRequestIdRef.current) {
-        setIsLoading(false);
-        runFlowAbortRef.current = null;
-      }
-    }
+    setActivePrompt(prompt.trim());
+    setRunKey((current) => current + 1);
   };
 
   const saveFlow = async () => {
@@ -238,54 +152,49 @@ function App() {
       return;
     }
 
-    saveFlowAbortRef.current?.abort();
-    const abortController = new AbortController();
-    saveFlowAbortRef.current = abortController;
-    const requestId = ++saveFlowRequestIdRef.current;
-
+    setIsSaving(true);
     setStatus("Saving to MongoDB...");
 
     try {
-      const response = await fetch(`${apiBaseUrl}/api/flows/save`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, response: result }),
-        signal: abortController.signal,
-      });
-
-      const data = (await response.json()) as SaveFlowResponse;
-
-      if (requestId !== saveFlowRequestIdRef.current) {
-        return;
-      }
-
-      if (!response.ok || !data.id) {
-        throw new Error(data.error || "Save failed.");
-      }
-
-      setStatus(`Saved successfully. Record ID: ${data.id}`);
+      const savedId = await saveFlowRun(apiBaseUrl, prompt, result);
+      setStatus(`Saved successfully. Record ID: ${savedId}`);
     } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") {
-        return;
-      }
-
       const message =
         error instanceof Error ? error.message : "Failed to save flow.";
       setStatus(message);
     } finally {
-      if (requestId === saveFlowRequestIdRef.current) {
-        saveFlowAbortRef.current = null;
-      }
+      setIsSaving(false);
     }
   };
 
-  useEffect(() => {
-    syncPromptNode(prompt);
-  }, [prompt, syncPromptNode]);
+  const nodesWithHandlers = nodes.map((node) =>
+    node.id === "prompt-node"
+      ? {
+          ...node,
+          data: {
+            ...node.data,
+            onChange: updatePromptNode,
+          },
+        }
+      : node,
+  );
 
   useEffect(() => {
-    syncResultNode(result);
-  }, [result, syncResultNode]);
+    if (!aiAnswer) {
+      return;
+    }
+
+    updateResultNode(aiAnswer);
+    setStatus("Flow completed.");
+  }, [aiAnswer, updateResultNode]);
+
+  useEffect(() => {
+    if (!isError) {
+      return;
+    }
+
+    setStatus(errorMessage || "Failed to run flow.");
+  }, [errorMessage, isError]);
 
   useEffect(() => {
     const shouldAutoClear =
@@ -307,13 +216,6 @@ function App() {
     };
   }, [status]);
 
-  useEffect(() => {
-    return () => {
-      runFlowAbortRef.current?.abort();
-      saveFlowAbortRef.current?.abort();
-    };
-  }, []);
-
   return (
     <main className="app-shell">
       <header className="app-header">
@@ -328,8 +230,13 @@ function App() {
         <button type="button" onClick={runFlow} disabled={isLoading}>
           {isLoading ? "Running..." : "Run Flow"}
         </button>
-        <button type="button" className="ghost" onClick={saveFlow}>
-          Save
+        <button
+          type="button"
+          className="ghost"
+          onClick={saveFlow}
+          disabled={isSaving}
+        >
+          {isSaving ? "Saving..." : "Save"}
         </button>
         <span className="status">{status}</span>
       </section>
@@ -337,7 +244,7 @@ function App() {
       <section className="flow-wrap">
         <div className="flow-canvas">
           <ReactFlow
-            nodes={nodes}
+            nodes={nodesWithHandlers}
             edges={edges}
             nodeTypes={nodeTypes}
             onNodesChange={onNodesChange}
