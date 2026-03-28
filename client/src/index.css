@@ -34,21 +34,11 @@
   font-display: swap;
 }
 
-@font-face {
-  font-family: "Geist Pixel";
-  src: url("./assets/fonts/GeistPixel-Square.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
   font-family: "Geist Sans", "Segoe UI", sans-serif;
   --app-text: var(--purple-12);
   --app-text-muted: var(--purple-11);
-  --app-bg-top: var(--amber-2);
   --app-bg-mid: var(--purple-1);
-  --app-bg-bottom: var(--jade-2);
   --primary-solid: var(--amber-8);
   --primary-solid-hover: var(--amber-9);
   --primary-text: var(--amber-1);
@@ -63,9 +53,6 @@
   --node-title-border: var(--purple-5);
   --node-title-bg-left: var(--amber-2);
   --node-title-bg-right: var(--jade-2);
-  --badge-text: var(--purple-11);
-  --badge-bg: var(--purple-3);
-  --badge-border: var(--purple-6);
   --focus-ring: var(--amber-8);
   --shadow-color: color-mix(in srgb, var(--purple-9) 12%, transparent);
   font-synthesis: none;

@@ -1,88 +1,56 @@
+import dotenv from "dotenv";
 import { OpenRouter } from "@openrouter/sdk";
-import { env } from "../config/env.ts";
+import {
+  getErrorMessage,
+  getErrorStatus,
+  getRetryAfterSeconds,
+  toModelList,
+  toNumber,
+  toProviderSort,
+} from "./utils.ts";
+import type { AiErrorCode } from "./types.ts";
+
+dotenv.config();
+
+const openrouterSettings = {
+  apiKey: process.env.OPENROUTER_API_KEY,
+  model: process.env.OPENROUTER_MODEL || "google/gemini-3.1-flash-lite-preview",
+  fallbackModels: toModelList(process.env.OPENROUTER_FALLBACK_MODELS),
+  maxTokens: toNumber(process.env.OPENROUTER_MAX_TOKENS, 256),
+  providerSort: toProviderSort(process.env.OPENROUTER_PROVIDER_SORT),
+  siteUrl: process.env.SITE_URL || "http://localhost:5173",
+  siteName: process.env.SITE_NAME || "MERN Flow Demo",
+} as const;
 
 const fallbackModels = [
-  env.openrouterModel,
-  ...env.openrouterFallbackModels,
+  openrouterSettings.model,
+  ...openrouterSettings.fallbackModels,
   "google/gemini-2.5-flash-lite",
   "meta-llama/llama-3.2-3b-instruct:free",
 ].filter((value, index, array) => array.indexOf(value) === index);
 
-const getClient = (): OpenRouter => {
-  if (!env.openrouterApiKey) {
+const getOpenRouterClient = (): OpenRouter => {
+  if (!openrouterSettings.apiKey) {
     throw new Error("OPENROUTER_API_KEY is not configured.");
   }
 
   return new OpenRouter({
-    apiKey: env.openrouterApiKey,
-    httpReferer: env.siteUrl,
-    appTitle: env.siteName,
+    apiKey: openrouterSettings.apiKey,
+    httpReferer: openrouterSettings.siteUrl,
+    appTitle: openrouterSettings.siteName,
   });
-};
-
-const getErrorStatus = (error: unknown): number | undefined => {
-  if (typeof error !== "object" || !error) {
-    return undefined;
-  }
-
-  const status = (error as { status?: unknown }).status;
-  if (typeof status === "number") {
-    return status;
-  }
-
-  const statusCode = (error as { statusCode?: unknown }).statusCode;
-  if (typeof statusCode === "number") {
-    return statusCode;
-  }
-
-  return undefined;
-};
-
-const getRetryAfterSeconds = (error: unknown): number | undefined => {
-  if (typeof error !== "object" || !error || !("headers" in error)) {
-    return undefined;
-  }
-
-  const headers = (
-    error as { headers?: { get?: (name: string) => string | null } }
-  ).headers;
-  const retryAfterRaw = headers?.get?.("retry-after") || undefined;
-
-  if (!retryAfterRaw) {
-    return undefined;
-  }
-
-  const asNumber = Number(retryAfterRaw);
-  if (Number.isFinite(asNumber) && asNumber > 0) {
-    return Math.floor(asNumber);
-  }
-
-  const asDate = Date.parse(retryAfterRaw);
-  if (Number.isFinite(asDate)) {
-    const seconds = Math.ceil((asDate - Date.now()) / 1000);
-    return seconds > 0 ? seconds : undefined;
-  }
-
-  return undefined;
-};
-
-const getErrorMessage = (error: unknown): string => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return String(error);
 };
 
 export class AiServiceError extends Error {
   public readonly status: number;
-  public readonly code: "RATE_LIMIT" | "CREDIT_LIMIT" | "UPSTREAM_UNAVAILABLE";
+  public readonly code: AiErrorCode;
   public readonly userMessage: string;
   public readonly retryAfterSeconds?: number;
 
   constructor(args: {
     message: string;
     status: number;
-    code: "RATE_LIMIT" | "CREDIT_LIMIT" | "UPSTREAM_UNAVAILABLE";
+    code: AiErrorCode;
     userMessage: string;
     retryAfterSeconds?: number;
   }) {
@@ -95,16 +63,16 @@ export class AiServiceError extends Error {
 }
 
 export const generateAiResponse = async (prompt: string): Promise<string> => {
-  const openRouter = getClient();
+  const openRouter = getOpenRouterClient();
 
   try {
     const completion = await openRouter.chat.send({
       chatGenerationParams: {
         models: fallbackModels,
         messages: [{ role: "user", content: prompt }],
-        maxTokens: Math.max(1, env.openrouterMaxTokens),
-        provider: env.openrouterProviderSort
-          ? { sort: env.openrouterProviderSort }
+        maxTokens: Math.max(1, openrouterSettings.maxTokens),
+        provider: openrouterSettings.providerSort
+          ? { sort: openrouterSettings.providerSort }
           : undefined,
         stream: false,
       },

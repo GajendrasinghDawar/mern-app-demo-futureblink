@@ -2,12 +2,7 @@
   min-height: 100vh;
   padding: 1.25rem;
   color: var(--app-text);
-  background: linear-gradient(
-    160deg,
-    var(--app-bg-top) 0%,
-    var(--app-bg-mid) 55%,
-    var(--app-bg-bottom) 100%
-  );
+  background: var(--app-bg-mid);
 }
 
 .app-header {
@@ -15,30 +10,12 @@
   margin: 0 auto;
 }
 
-.title-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
 .app-header h1 {
   margin: 0;
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
-  letter-spacing: -0.02em;
+  font-size: clamp(1.75rem, 4vw, 2.4rem);
+  letter-spacing: -0.01em;
   font-family: "Geist Sans", "Segoe UI", sans-serif;
   font-weight: 700;
-}
-
-.pixel-badge {
-  border-radius: 999px;
-  padding: 0.16rem 0.42rem;
-  font-family: "Geist Pixel", "Geist Sans", sans-serif;
-  font-size: 0.62rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--badge-text);
-  background: var(--badge-bg);
-  border: 1px solid var(--badge-border);
 }
 
 .app-header p {
@@ -107,7 +84,6 @@
   border-radius: 1rem;
   overflow: hidden;
   background: var(--panel-bg);
-  backdrop-filter: blur(2px);
 }
 
 .flow-node {
@@ -116,7 +92,7 @@
   border-radius: 0.85rem;
   border: 1px solid var(--node-border);
   background: var(--node-bg);
-  box-shadow: 0 4px 14px var(--shadow-color);
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .node-title {

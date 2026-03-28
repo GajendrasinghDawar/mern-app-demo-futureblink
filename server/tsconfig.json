@@ -12,13 +12,5 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": [
-    "*.ts",
-    "api/**/*.ts",
-    "config/**/*.ts",
-    "models/**/*.ts",
-    "routes/**/*.ts",
-    "services/**/*.ts",
-    "types/**/*.ts"
-  ]
+  "include": ["*.ts", "api/**/*.ts"]
 }

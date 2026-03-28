@@ -250,10 +250,7 @@ function App() {
   return (
     <main className="app-shell">
       <header className="app-header">
-        <div className="title-row">
-          <h1>AI Prompt Flow</h1>
-          <span className="pixel-badge">flow</span>
-        </div>
+        <h1>AI Prompt Flow</h1>
         <p>
           Type in the input node, run the flow, and store the result in MongoDB.
         </p>
