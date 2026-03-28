@@ -1,3 +1,5 @@
+import type { ObjectId } from "mongodb";
+
 export type AskAiRequestBody = {
   prompt?: string;
 };
@@ -14,4 +16,12 @@ export type AskAiResponse = {
 export type SaveFlowResponse = {
   id: string;
   createdAt: string;
+};
+
+export type FlowRunDocument = {
+  _id?: ObjectId;
+  prompt: string;
+  response: string;
+  createdAt: Date;
+  updatedAt: Date;
 };

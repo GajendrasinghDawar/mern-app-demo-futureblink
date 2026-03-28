@@ -1,6 +1,5 @@
-import mongoose from "mongoose";
-import { env } from "./src/config/env.ts";
-import { FlowRunModel } from "./src/models/flowRun.ts";
+import { closeMongo, connectMongo, getFlowRunsCollection } from "./config/db.ts";
+import { env } from "./config/env.ts";
 
 const checkDatabase = async (): Promise<void> => {
   console.log("\n--- MongoDB Connection Check ---\n");
@@ -12,7 +11,7 @@ const checkDatabase = async (): Promise<void> => {
   console.log("MONGODB_URI is set");
 
   try {
-    await mongoose.connect(env.mongoUri);
+    await connectMongo();
     console.log("Connected to MongoDB successfully");
   } catch (error) {
     const message =
@@ -21,28 +20,26 @@ const checkDatabase = async (): Promise<void> => {
     process.exit(1);
   }
 
-  const db = mongoose.connection.db;
-
-  if (!db) {
-    console.error("MongoDB connection is not available.");
-    process.exit(1);
-  }
+  const collection = getFlowRunsCollection();
+  const db = collection.db;
 
   const collections = await db.listCollections().toArray();
   console.log(
     `Database: "${db.databaseName}" - ${collections.length} collection(s)`,
   );
 
-  const testDoc = await FlowRunModel.create({
+  const testDoc = await collection.insertOne({
     prompt: "__db_check_test__",
     response: `Test document created at ${new Date().toISOString()}`,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
-  console.log(`Write OK: ${String(testDoc._id)}`);
+  console.log(`Write OK: ${testDoc.insertedId.toHexString()}`);
 
-  await FlowRunModel.findByIdAndDelete(testDoc._id);
+  await collection.deleteOne({ _id: testDoc.insertedId });
   console.log("Delete OK");
 
-  await mongoose.disconnect();
+  await closeMongo();
   console.log("\n--- All checks passed ---\n");
 };
 

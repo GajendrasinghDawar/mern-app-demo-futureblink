@@ -2,11 +2,11 @@
   "name": "server",
   "version": "1.0.0",
   "description": "Express API for OpenRouter and MongoDB",
-  "main": "src/server.ts",
+  "main": "server.ts",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --watch src --ext ts --exec node src/server.ts",
-    "start": "node src/server.ts",
+    "dev": "nodemon --watch . --ext ts --exec node server.ts",
+    "start": "node server.ts",
     "typecheck": "tsc --noEmit",
     "check-db": "node check-db.ts"
   },
@@ -14,7 +14,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
-    "mongoose": "^9.3.3",
+    "mongodb": "^7.1.1",
     "openai": "^6.33.0"
   },
   "devDependencies": {

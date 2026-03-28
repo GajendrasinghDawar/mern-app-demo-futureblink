@@ -75,6 +75,24 @@ From root:
 npm run build
 ```
 
+## Deploy To Vercel
+
+Deploy frontend and backend as two Vercel projects from the same repo.
+
+1. Frontend project
+
+- Root Directory: `client`
+- Framework: Vite
+- Build command: `npm run build`
+- Output directory: `dist`
+- Environment: `VITE_API_BASE_URL=https://<your-backend>.vercel.app`
+
+2. Backend project
+
+- Root Directory: `server`
+- Uses `server/vercel.json` and `server/api/index.ts`
+- Environment variables: `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `MONGODB_URI`, `SITE_URL`, `SITE_NAME`
+
 ## Type Check
 
 From root:
