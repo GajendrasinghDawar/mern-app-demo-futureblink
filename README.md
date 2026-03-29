@@ -1,5 +1,7 @@
 # MERN App - FutureBlink Task
 
+see deployed version: https://futureblink-demo.vercel.app/
+
 This project is a MERN-style app with:
 
 - React + React Flow frontend (TypeScript)
@@ -22,32 +24,19 @@ This project is a MERN-style app with:
 
 ## Prerequisites
 
-- Node.js 22.6+ (recommended: latest Node 22/24/25)
+- Node.js 24+
 - MongoDB (local or Atlas)
 - OpenRouter API key
 
 ## Environment Setup
 
-1. In `server/`, create `.env` from `.env.example`.
+1. In `server/` and `client/`, create `.env` from `.env.example`.
 2. Fill values:
 
 ```env
-PORT=5000
 MONGODB_URI=mongodb://127.0.0.1:27017/mern-flow
 OPENROUTER_API_KEY=your_openrouter_api_key
-OPENROUTER_MODEL=google/gemini-3.1-flash-lite-preview
-OPENROUTER_FALLBACK_MODELS=google/gemini-2.5-flash-lite,meta-llama/llama-3.2-3b-instruct:free
-OPENROUTER_MAX_TOKENS=256
-OPENROUTER_PROVIDER_SORT=price
-SITE_URL=http://localhost:5173
-SITE_NAME=MERN Flow Demo
 ```
-
-OpenRouter controls:
-
-- `OPENROUTER_FALLBACK_MODELS`: comma-separated model ids tried as automatic fallbacks.
-- `OPENROUTER_MAX_TOKENS`: caps response tokens to reduce credit usage.
-- `OPENROUTER_PROVIDER_SORT`: optional provider routing strategy: `price`, `latency`, or `throughput`.
 
 Optional frontend API base URL in `client/.env`:
 
@@ -76,7 +65,7 @@ npm run dev
 - Frontend: http://localhost:5173
 - Backend: http://localhost:5000
 
-## Build
+## For Build if needed for production
 
 From root:
 
@@ -93,14 +82,13 @@ Deploy frontend and backend as two Vercel projects from the same repo.
 - Root Directory: `client`
 - Framework: Vite
 - Build command: `npm run build`
-- Output directory: `dist`
 - Environment: `VITE_API_BASE_URL=https://<your-backend>.vercel.app`
 
 2. Backend project
 
 - Root Directory: `server`
 - Uses `server/vercel.json` and `server/api/index.ts`
-- Environment variables: `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `MONGODB_URI`, `SITE_URL`, `SITE_NAME`
+- Environment variables: `OPENROUTER_API_KEY`,`MONGODB_URI`,
 
 ## Type Check
 
@@ -108,19 +96,6 @@ From root:
 
 ```bash
 npm run typecheck
-```
-
-## MongoDB Driver Quick Start
-
-This repo includes a quick-start script modeled on the official MongoDB Node.js driver guide.
-
-1. Set `MONGODB_URI` in `server/.env` to your Atlas connection string.
-2. Ensure Atlas sample data is loaded (includes `sample_mflix.movies`).
-3. Run:
-
-```bash
-cd server
-npm run quickstart
 ```
 
 The script queries `sample_mflix.movies` for `Back to the Future` and prints the matching document.
